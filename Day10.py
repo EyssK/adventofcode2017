@@ -78,4 +78,4 @@ if __name__ == "__main__":
     # lines[0] = "1,2,4"
 
     khash = knotHash(lines[0])
-    print(hash)
+    print(khash)
