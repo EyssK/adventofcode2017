@@ -1,5 +1,6 @@
 import unittest
 import timeit
+import random, numpy
 
 
 class TestDay16(unittest.TestCase):
@@ -75,14 +76,13 @@ if __name__ == "__main__":
             arg = move[1:].split('/')
             if arg[0].isnumeric():
                 arg = (int(arg[0]), int(arg[1]))
-
         else:
             arg = int(move[1:])
         dance_moves[idx] = [action[move[0]], arg]
 
     # start to dance:
     programs = 'abcdefghijklmnop'
-    for move in dance_moves:
+    for idx, move in enumerate(dance_moves):
         programs = move[0](programs, move[1])
     part1_res = programs
     print('Part1: ', part1_res)
@@ -96,8 +96,45 @@ if __name__ == "__main__":
         for move in dance_moves:
             programs = move[0](programs, move[1])
     period = len(previous_programs)
+    print("Period: ", period)
+    print("Offset: ", 10 ** 9 % period)
     for remain in range(10**9 % period):
         for move in dance_moves:
             programs = move[0](programs, move[1])
     part2_res = programs
     print('Part2: ', part2_res)
+
+    # find min and max period
+    period_list = list()
+    for i in range(1,20):
+        # generate random moves
+        r_gen = random.Random()
+        r_gen.seed()
+        for dance_move_idx in range(len(dance_moves)):
+            action_choosed = r_gen.choice('sxp')
+            dance_moves[dance_move_idx] = [action[action_choosed]]
+            if action_choosed == 's':
+                dance_moves[dance_move_idx].append(r_gen.randint(1,15))
+            elif action_choosed == 'x':
+                dance_moves[dance_move_idx].append((r_gen.randint(0, 15), r_gen.randint(0, 15)))
+            elif action_choosed == 'p':
+                dance_moves[dance_move_idx].append([r_gen.choice('abcdefghijklmnop'), r_gen.choice('abcdefghijklmnop')])
+
+        # measure periods
+        programs = 'abcdefghijklmnop'
+        previous_programs = list()
+        while programs not in previous_programs:
+            previous_programs.append(programs)
+            for move in dance_moves:
+                programs = move[0](programs, move[1])
+        period = len(previous_programs)
+        period_list.append(period)
+        for remain in range(10 ** 9 % period):
+            for move in dance_moves:
+                programs = move[0](programs, move[1])
+        part2_res = programs
+
+    print("period statistics on 1000 iterations:")
+    print("min = ", min(period_list), " max = ", max(period_list))
+    print("avg = ", numpy.average(period_list)," std = ", numpy.std(period_list))
+    print(period_list)
